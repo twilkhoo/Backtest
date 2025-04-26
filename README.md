@@ -1,8 +1,45 @@
 # Backtesting Engine
 
 We'll be creating a Backtest Replay Engine.
-There will be two modes:
-  1. Backtest- we just run a strategy against stock data we already have.
-  2. Replay- create a "stream" of data with specified throttling, and have this stream be a realtime simulation of market data, implemented with Kafka and Spark Structured Streaming.
+
+This project creates a stream of historical orders with specified throttling, simulating a realtime market data feed, implemented with Kafka and Spark Structured Streaming.
 
 This will all be displayed with a Streamlit UI.
+
+
+## Building from scratch:
+
+Update/install packages
+
+```
+sudo apt update
+sudo apt install -y openjdk-11-jdk python3 python3-venv python3-pip wget tar
+```
+
+Start Zookeeper and Kafka (each in its own terminal)
+
+```
+cd kafka && bin/zookeeper-server-start.sh config/zookeeper.properties
+cd kafka bin/kafka-server-start.sh config/server.properties
+```
+
+Create a new Kafka topic
+```
+cd kafka
+bin/kafka-topics.sh --create --topic words --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+```
+
+Create and activate venv
+```
+cd ~
+python3 -m venv spark-kafka-env
+source spark-kafka-env/bin/activate
+pip install --upgrade pip
+pip install pyspark kafka-python
+```
+
+Run the pipeline
+```
+python3 producer.py
+python3 spark_consumer.py
+```
