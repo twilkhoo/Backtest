@@ -35,7 +35,7 @@ cd ~
 python3 -m venv spark-kafka-env
 source spark-kafka-env/bin/activate
 pip install --upgrade pip
-pip install pyspark kafka-python streamlit
+pip install pyspark kafka-python streamlit plotly
 ```
 
 Run the pipeline
