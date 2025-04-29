@@ -20,13 +20,13 @@ Start Zookeeper and Kafka (each in its own terminal)
 
 ```
 cd kafka && bin/zookeeper-server-start.sh config/zookeeper.properties
-cd kafka bin/kafka-server-start.sh config/server.properties
+cd kafka && bin/kafka-server-start.sh config/server.properties
 ```
 
 Create a new Kafka topic
 ```
 cd kafka
-bin/kafka-topics.sh --create --topic words --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+bin/kafka-topics.sh --create --topic ohlcv --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
 ```
 
 Create and activate venv
@@ -42,4 +42,10 @@ Run the pipeline
 ```
 python3 producer.py
 python3 spark_consumer.py
+```
+
+Deleting a topic (for testing)
+```
+bin/kafka-topics.sh --bootstrap-server localhost:9092 --delete --topic __consumer_offsets
+bin/kafka-topics.sh --bootstrap-server localhost:9092 --list
 ```
