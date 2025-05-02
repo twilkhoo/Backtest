@@ -38,14 +38,18 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Run the pipeline
+Run the Flask UI (which will automatically start up the consumer, and invoke the producer when details are submitted)
 ```
-python3 producer.py
-python3 spark_consumer.py
+python app2.py
 ```
 
 Deleting a topic (for testing)
 ```
-bin/kafka-topics.sh --bootstrap-server localhost:9092 --delete --topic __consumer_offsets
+bin/kafka-topics.sh --bootstrap-server localhost:9092 --delete --topic <topic_name>
 bin/kafka-topics.sh --bootstrap-server localhost:9092 --list
+```
+
+Stopping ZooKeeper
+```
+bin/zookeeper-server-stop.sh
 ```
