@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/image.png" alt="board"></p>
+<p align="center"><img src="assets/image.jpg" alt="candlesticks"></p>
 <p align="center"><h1 align="center">Backtest Replay</h1></p>
 <p align="center">
 	<em><code>❯ Backtest popular trading strategies with real-time ingestion</code></em>
@@ -35,6 +35,17 @@ Backtesting is the most important aspect of trading strategy development- the be
 ## Technical Process
 
 The `Python` app, made with `Flask`, requires inputs to track the historical data of a particular security, given a date range. Using a seperate Producer process, this data is fetched from `Polygon.io`, noting that the API does have data limits based on the subscription tier. The Producer then submits this data into an `Apache Kafka` stream, day by day at a particular user-defined rate (although 1hz works best). An `Apache Spark Structured Streaming` job subscribes to this Kafka topic and reads new entries periodically, which simulates the real-time-ness of the data. This new data is then processed based on a particular strategy, and relevant strategy parameters. Finally, it is displayed, with strategy parameters (e.g. moving averages) overlayed on the ticks, to visually represent how the strategy works and performs.
+
+## Overview of Strategies
+
+### Simple Moving Average Crossover
+
+
+### Exponential Moving Average Crossover
+
+
+### RSI
+
 
 ##  Features
 
@@ -109,7 +120,7 @@ pip install -r requirements.txt
 
 Run the Flask UI (which will automatically start up the consumer, and invoke the producer when details are submitted)
 ```
-python app2.py
+python app3.py
 ```
 
 Deleting a topic (for testing)
@@ -123,8 +134,6 @@ Stopping ZooKeeper
 bin/zookeeper-server-stop.sh
 ```
 
-
-
 ##  Future Improvements
 
 - Right now, the form of creating strategies isn't very extensible. I'm essentially writing each one from scratch, loosely following the general pattern that each strategy needs to operate on the entire timeseries dataframe, and return a dash figure (chart). [Backtesting.py](https://kernc.github.io/backtesting.py/) has a much more extensible API- define a class, constructor, and next function (like an iterator) to consume one piece of data (like a tick) and adjust its parameters this way.
@@ -132,20 +141,3 @@ bin/zookeeper-server-stop.sh
 ##  License
 
 This project is protected under the [MIT](https://choosealicense.com/licenses/mit/) License. For more details, refer to the [LICENSE](https://choosealicense.com/licenses/mit/) file.
-
-
-
-
-
-
-
-
-# Backtesting Engine
-
-We'll be creating a Backtest Replay Engine.
-
-This project creates a stream of historical orders with specified throttling, simulating a realtime market data feed, implemented with Kafka and Spark Structured Streaming.
-
-This will all be displayed with a Streamlit UI.
-
-
