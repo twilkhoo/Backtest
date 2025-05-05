@@ -1,8 +1,5 @@
-# strategies.py
-
 import pandas as pd
 import plotly.graph_objs as go
-
 
 def moving_average_crossover(
     df: pd.DataFrame,
@@ -13,7 +10,7 @@ def moving_average_crossover(
   # Make a copy and sort by timestamp.
   df = df.sort_values('ts').copy()
 
-  # Base candlestick figure
+  # Base candlestick figure.
   fig = go.Figure(data=[go.Candlestick(
       x=df['ts'],
       open=df['open'], high=df['high'],
@@ -25,7 +22,7 @@ def moving_average_crossover(
   df['long_ma'] = df['close'].rolling(window=long_period).mean()
 
   cash = starting_cash
-  pos = 0
+  pos = 0 # The current position (how much money we're up/down in the current long/short stretch).
 
   # The actual backtesting.
   for i in range(1, len(df)):
