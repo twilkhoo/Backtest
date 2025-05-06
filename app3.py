@@ -10,6 +10,7 @@ from dash.dependencies import Input, Output, State
 import plotly.graph_objs as go
 from simple_ma_crossover import *
 from exponential_ma_crossover import *
+from rsi import *
 
 spark = (
     SparkSession.builder
@@ -136,8 +137,9 @@ app.layout = html.Div([
             html.Br(),
             html.Label("Strategy:"), dcc.Dropdown(
                 id="strategy-dropdown",
-                options=[{"label": "Simple Moving Average Crossover", "value": "sma"}, 
-                         {"label": "Exponential Moving Average Crossover", "value": "ema"}],
+                options=[{"label": "Simple Moving Average Crossover", "value": "sma"},
+                         {"label": "Exponential Moving Average Crossover", "value": "ema"},
+                         {"label": "RSI Strategy", "value": "rsi"}],
                 value="sma",
                 style={"width": "80%"}
             ),
@@ -147,6 +149,8 @@ app.layout = html.Div([
                     dcc.Input(id="short-period", type="number",
                               style={"display": "none"}),
                     dcc.Input(id="long-period",  type="number",
+                              style={"display": "none"}),
+                    dcc.Input(id="rsi-period",  type="number",
                               style={"display": "none"})
                 ],
                 style={"display": "flex", "gap": "10px"}
@@ -188,16 +192,32 @@ app.layout = html.Div([
     Input("strategy-dropdown", "value")
 )
 def pick_strategy(strategy):
+  # hidden versions of each, so dash always knows about every id
+  hidden_s = dcc.Input(id="short-period", type="number",
+                       style={"display": "none"})
+  hidden_l = dcc.Input(id="long-period",  type="number",
+                       style={"display": "none"})
+  hidden_r = dcc.Input(id="rsi-period",    type="number",
+                       style={"display": "none"})
+
   if strategy in ("sma", "ema"):
-    label = "Short EMA Period:" if strategy == "ema" else "Short SMA Period:"
-    label2 = "Long EMA Period:" if strategy == "ema" else "Long SMA Period:"
-    return [  
-        html.Div([html.Label(label),  dcc.Input(
-            id="short-period", type="number", min=1, value=5)]),
-        html.Div([html.Label(label2), dcc.Input(
-            id="long-period",  type="number", min=1, value=30)])
-    ]
-  return []
+    # show short & long, hide rsi
+    lab1 = "Short MA Period:" if strategy == "sma" else "Short EMA Period:"
+    lab2 = "Long MA Period:" if strategy == "sma" else "Long EMA Period:"
+    show_s = html.Div([html.Label(lab1), dcc.Input(
+        id="short-period", type="number", min=1, value=5)])
+    show_l = html.Div([html.Label(lab2), dcc.Input(
+        id="long-period",  type="number", min=1, value=30)])
+    return [show_s, show_l, hidden_r]
+
+  elif strategy == "rsi":
+    # show rsi, hide short & long
+    show_r = html.Div([html.Label("RSI Period:"), dcc.Input(
+        id="rsi-period", type="number", min=1, value=7)])
+    return [show_r, hidden_s, hidden_l]
+
+  # fallback: hide everything
+  return [hidden_s, hidden_l, hidden_r]
 
 # Callback to actually start the backtesting.
 
@@ -220,11 +240,12 @@ def pick_strategy(strategy):
     State("strategy-dropdown", "value"),
     State("short-period", "value"),
     State("long-period", "value"),
+    State("rsi-period", "value"),
     State("data-count-store", "data")
 )
 def handle_events(n_clicks, n_intervals,
                   ticker, s_date, e_date, prod_int, cons_int, api_key,
-                  starting_cash, strategy, short_period, long_period,
+                  starting_cash, strategy, short_period, long_period, rsi_period,
                   store_data):
 
   # Let's us find what callback was initiated.
@@ -274,6 +295,12 @@ def handle_events(n_clicks, n_intervals,
             starting_cash=float(starting_cash),
             short_period=int(short_period),
             long_period=int(long_period)
+        )
+      elif strategy == 'rsi':
+        fig = rsi_strategy(
+            df,
+            starting_cash=float(starting_cash),
+            rsi_period=int(rsi_period)
         )
 
       fig.update_layout(

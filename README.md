@@ -137,9 +137,11 @@ bin/zookeeper-server-stop.sh
 
 ##  Future Improvements
 
-- Right now, the form of creating strategies isn't very extensible. I'm essentially writing each one from scratch, loosely following the general pattern that each strategy needs to operate on the entire timeseries dataframe, and return a dash figure (chart). [Backtesting.py](https://kernc.github.io/backtesting.py/) has a much more extensible API- define a class, constructor, and next function (like an iterator) to consume one piece of data (like a tick) and adjust its parameters this way.
+- Right now, the form of creating strategies isn't very extensible. I'm essentially writing each one from scratch, loosely following the general pattern that each strategy needs to operate on the entire timeseries dataframe, and return a dash figure (chart). [Backtesting.py](https://kernc.github.io/backtesting.py/) has a much more extensible API- define a class, constructor, and next function (like an iterator) to consume one piece of data (like a tick) and adjust its parameters this way. We can use an MVC architecture to decouple the actual strategy from the display.
 
 - The Moving Average period should compute data for the current data point too, so we should fetch OHLC data X days before the start date for an X-day moving average.
+
+- Optimizations: Instead of having Spark return the entire df after a new tick, just return the update. With this, we can modify our moving average/rsi functions to recompute state only using the next tick, instead of requiring the entire df again. This isn't too much of an issue with the moving average strategies, as they only scan data required for the moving average computations, but for the rsi, it ends up doing a whole linear scan.
 
 - Also, for what it's worth, Spark Structured Streaming may not have been the best choice for inherent realtime data- Apache Flink may have been a better choice for such an event-driven architecture. My Databricks internship was going to be on Spark Streaming infra so I wanted to get used to the platform, but otherwise Spark Streaming's batching mechanism isn't the best choice.
 
