@@ -63,6 +63,7 @@ Frontend built with:
 
 Below is a working demo of the frontend, and backend.
 
+https://github.com/user-attachments/assets/05d503e1-6ef3-4694-836e-b4811ce0fd06
 
 ##  Getting Started
 
