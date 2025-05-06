@@ -39,13 +39,13 @@ The `Python` app, made with `Flask`, requires inputs to track the historical dat
 ## Overview of Strategies
 
 ### Simple Moving Average Crossover
-
+When the fast period crosses over the slow one, we go long and buy as many shares possible with the current cash amount. When the fast crosses under the slow one, we go short and short as many shares possible with the current cash amount. At each crossover, if we have already bought shares/shorts, sell everything.
 
 ### Exponential Moving Average Crossover
-
+Similar details to simple moving average, but the moving averages are weighted exponentially to favour more recent data as opposed to older data points.
 
 ### RSI
-
+The Relative Strength Index is a value between 0 and 100, that reflects overbought or oversold conditions. Given an N tick window, we first compute the average gain and average loss in the timespan (no negatives, 0 instead), and incorporates every next tick into the average (Wilder's Smoothing). The relative strength (RS) is simply gainAvg / lossAvg, and RSI is 100 - (1 + RS). An RSI value of > 70 indicates it is "too high" and should be shorted, whereas an RSI value of < 30 indicates the price may be "too low" and should be bought. We buy and sell according to the same rules in the SMA strategy above.
 
 ##  Features
 
@@ -137,6 +137,10 @@ bin/zookeeper-server-stop.sh
 ##  Future Improvements
 
 - Right now, the form of creating strategies isn't very extensible. I'm essentially writing each one from scratch, loosely following the general pattern that each strategy needs to operate on the entire timeseries dataframe, and return a dash figure (chart). [Backtesting.py](https://kernc.github.io/backtesting.py/) has a much more extensible API- define a class, constructor, and next function (like an iterator) to consume one piece of data (like a tick) and adjust its parameters this way.
+
+- The Moving Average period should compute data for the current data point too, so we should fetch OHLC data X days before the start date for an X-day moving average.
+
+- Also, for what it's worth, Spark Structured Streaming may not have been the best choice for inherent realtime data- Apache Flink may have been a better choice for such an event-driven architecture. My Databricks internship was going to be on Spark Streaming infra so I wanted to get used to the platform, but otherwise Spark Streaming's batching mechanism isn't the best choice.
 
 ##  License
 

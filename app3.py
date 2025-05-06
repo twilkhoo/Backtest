@@ -8,7 +8,8 @@ import dash
 from dash import dcc, html, callback_context
 from dash.dependencies import Input, Output, State
 import plotly.graph_objs as go
-from moving_average_crossover import *
+from simple_ma_crossover import *
+from exponential_ma_crossover import *
 
 spark = (
     SparkSession.builder
@@ -135,8 +136,9 @@ app.layout = html.Div([
             html.Br(),
             html.Label("Strategy:"), dcc.Dropdown(
                 id="strategy-dropdown",
-                options=[{"label": "Moving Average Crossover", "value": "ma"}],
-                value="ma",
+                options=[{"label": "Simple Moving Average Crossover", "value": "sma"}, 
+                         {"label": "Exponential Moving Average Crossover", "value": "ema"}],
+                value="sma",
                 style={"width": "80%"}
             ),
             html.Div(
@@ -186,12 +188,14 @@ app.layout = html.Div([
     Input("strategy-dropdown", "value")
 )
 def pick_strategy(strategy):
-  if strategy == "ma":
-    return [
-        html.Div([html.Label("Short MA Period:"), dcc.Input(
+  if strategy in ("sma", "ema"):
+    label = "Short EMA Period:" if strategy == "ema" else "Short SMA Period:"
+    label2 = "Long EMA Period:" if strategy == "ema" else "Long SMA Period:"
+    return [  
+        html.Div([html.Label(label),  dcc.Input(
             id="short-period", type="number", min=1, value=5)]),
-        html.Div([html.Label("Long MA Period:"), dcc.Input(
-            id="long-period", type="number", min=1, value=30)])
+        html.Div([html.Label(label2), dcc.Input(
+            id="long-period",  type="number", min=1, value=30)])
     ]
   return []
 
@@ -255,9 +259,17 @@ def handle_events(n_clicks, n_intervals,
           low=df['low'], close=df['close']
       )])
 
-      # Backtest: Moving Average Crossover.
-      if strategy == 'ma':
-        fig = moving_average_crossover(
+      # Backtest: Simple Moving Average Crossover.
+      if strategy == 'sma':
+        fig = simple_ma_crossover(
+            df,
+            starting_cash=float(starting_cash),
+            short_period=int(short_period),
+            long_period=int(long_period)
+        )
+      # Backtest: Exponential Moving Average Crossover.
+      elif strategy == 'ema':
+        fig = exponential_ma_crossover(
             df,
             starting_cash=float(starting_cash),
             short_period=int(short_period),

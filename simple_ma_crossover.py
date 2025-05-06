@@ -1,7 +1,7 @@
 import pandas as pd
 import plotly.graph_objs as go
 
-def moving_average_crossover(
+def simple_ma_crossover(
     df: pd.DataFrame,
     starting_cash: float,
     short_period: int,
@@ -33,20 +33,20 @@ def moving_average_crossover(
     if pd.isna(prev_s) or pd.isna(prev_l) or pd.isna(curr_s) or pd.isna(curr_l):
       continue
 
-    # BUY signal
+    # Short crossing over long, buy!
     if prev_s <= prev_l and curr_s > curr_l:
       if pos < 0:
-        cash += pos * price  # close short
+        cash += pos * price  # Close the short.
         pos = 0
       if pos == 0:
         n = int(cash / price)
         pos = n
         cash -= n * price
 
-    # SELL / SHORT signal
+    # Short crossing under long, sell!
     elif prev_s >= prev_l and curr_s < curr_l:
       if pos > 0:
-        cash += pos * price  # close long
+        cash += pos * price  # Close the long.
         pos = 0
       if pos == 0:
         n = int(cash / price)
